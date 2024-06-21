@@ -1,39 +1,38 @@
 import {
-  Image,
   StyleSheet,
   Platform,
   TextInput,
   View,
   Button,
-  ScrollView,
   KeyboardAvoidingView,
 } from "react-native";
 
-import { HelloWave } from "@/components/HelloWave";
-import ParallaxScrollView from "@/components/ParallaxScrollView";
 import { ThemedText } from "@/components/ThemedText";
-import { ThemedView } from "@/components/ThemedView";
 import { FlatList } from "react-native";
 import { useRef, useState } from "react";
-import { collection, addDoc } from "firebase/firestore";
-import { db } from "@/firebaseConfig";
 export default function HomeScreen() {
   const [message, setMessage] = useState("");
   const [sentMessages, setSentMessages] = useState<string[]>([]);
   const flatListRef = useRef<FlatList>(null);
 
   async function sendMessage() {
-    console.log("Message sent:", message);
     setSentMessages([...sentMessages, message]);
-    try {
-      const docRef = await addDoc(collection(db, "chat"), {
-        message: message,
-      });
-      console.log("Document written with ID: ", docRef.id);
-    } catch (e) {
-      console.error("Error adding document: ", e);
+
+    const response = await fetch(
+      "https://o2iyt64b5jzabbnrvch6cohp340igqzt.lambda-url.ap-southeast-1.on.aws/",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ message }),
+      }
+    );
+    if (response.ok) {
+      console.log("Message sent successfully");
+    } else {
+      console.error("Failed to send message");
     }
-    setMessage("");
   }
 
   return (
